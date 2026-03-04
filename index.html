@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@flaticon/flaticon-uicons@3/css/all/all.css">
+<script src="https://cdn.jsdelivr.net/npm/@lottiefiles/lottie-player@2/dist/lottie-player.js"></script>
 <!-- OpenMoji: 輕量自製 parser，無需額外 JS library -->
 <style>
 :root {
@@ -109,9 +110,9 @@ body {
   min-height: 100dvh;
 }
 .welcome-mascot {
-  font-size: 80px;
+  width: 160px;
+  height: 160px;
   line-height: 1;
-  animation: bounce 1.2s ease-in-out infinite;
 }
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
@@ -773,7 +774,9 @@ img.emoji {
 
   <!-- ==================== Welcome ==================== -->
   <div id="screen-welcome" class="screen active">
-    <div class="welcome-mascot">🦕</div>
+    <div class="welcome-mascot">
+      <lottie-player src="https://assets-v2.lottiefiles.com/a/5a41dca4-117d-11ee-a1b0-f792db995a62/IXKI0ODgd2.json" autoplay loop style="width:160px;height:160px"></lottie-player>
+    </div>
     <div class="welcome-title">千數探險家</div>
     <div class="welcome-sub">和 🦕 一起探索 1 到 1000！</div>
     <button class="btn btn-blue welcome-btn" onclick="initAudio(); showScreen('screen-menu');">
@@ -790,7 +793,7 @@ img.emoji {
       <div class="menu-title">選擇關卡</div>
     </div>
     <div class="menu-card" onclick="sfxClick(); showScreen('screen-explore');">
-      <div class="menu-card-icon"><i class="fi fi-rr-map-location-track" style="color:var(--orange)"></i></div>
+      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/057fc786-7ed0-4ef8-ac4c-f5b088e527a9/oBuJwfUZRS.json" autoplay loop style="width:52px;height:52px"></lottie-player></div>
       <div class="menu-card-body">
         <div class="menu-card-title">探索千數表</div>
         <div class="menu-card-desc">點擊數字，看看它的鄰居在哪裡！</div>
@@ -798,7 +801,7 @@ img.emoji {
       <i class="fi fi-rr-angle-right icon menu-card-chevron"></i>
     </div>
     <div class="menu-card" onclick="sfxClick(); startNeighborGame();">
-      <div class="menu-card-icon"><i class="fi fi-rr-target" style="color:var(--green)"></i></div>
+      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/a753c220-0c29-4a1e-b243-bf46165246e5/70nC8RGlwk.json" autoplay loop style="width:52px;height:52px"></lottie-player></div>
       <div class="menu-card-body">
         <div class="menu-card-title">找鄰居</div>
         <div class="menu-card-desc">猜猜數字的前後鄰居是誰？</div>
@@ -806,7 +809,7 @@ img.emoji {
       <i class="fi fi-rr-angle-right icon menu-card-chevron"></i>
     </div>
     <div class="menu-card" onclick="sfxClick(); startSkip();">
-      <div class="menu-card-icon"><i class="fi fi-rr-forward-fast" style="color:var(--blue)"></i></div>
+      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/4dd09324-aa46-47c3-97c5-72415bccc152/h2OO19PLNt.json" autoplay loop style="width:52px;height:52px"></lottie-player></div>
       <div class="menu-card-body">
         <div class="menu-card-title" style="color:var(--blue)">跳跳數</div>
         <div class="menu-card-desc">按規律填入缺少的數字</div>
@@ -814,7 +817,7 @@ img.emoji {
       <i class="fi fi-rr-angle-right icon menu-card-chevron"></i>
     </div>
     <div class="menu-card" onclick="sfxClick(); startPosition();">
-      <div class="menu-card-icon"><i class="fi fi-rr-map-marker" style="color:var(--purple)"></i></div>
+      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/bd1ada58-656e-4ec3-a412-e53e41609a02/euh5bzUnlK.json" autoplay loop style="width:52px;height:52px"></lottie-player></div>
       <div class="menu-card-body">
         <div class="menu-card-title" style="color:var(--purple)">數字位置</div>
         <div class="menu-card-desc">把數字卡拖到千數表的正確位置</div>
