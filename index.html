@@ -612,43 +612,126 @@ body {
 #screen-position {
   gap: 16px;
 }
+.pos-chart-card {
+  padding: 14px;
+  margin-bottom: 0;
+}
+.pos-label {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
 .mini-chart {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
-  gap: 3px;
+  gap: 4px;
 }
 .mini-cell {
   aspect-ratio: 1;
   border: 1.5px solid var(--border);
-  border-radius: 4px;
-  font-size: clamp(9px, 2.2vw, 13px);
-  font-weight: 700;
+  border-radius: 5px;
+  font-size: clamp(10px, 2.5vw, 14px);
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--white);
   color: var(--text);
+  position: relative;
 }
-.mini-cell.mini-highlight {
-  background: var(--selected);
-  border-color: var(--border-selected);
-  font-weight: 900;
-}
-.mini-cell.mini-hidden {
+.mini-cell.drop-slot {
+  border: 2.5px dashed var(--blue);
   background: #EFF6FF;
-  border: 2px dashed var(--blue);
   color: var(--blue);
+  font-size: clamp(12px, 3vw, 18px);
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.mini-cell.drop-slot.drag-over {
+  background: #DBEAFE;
+  border-color: var(--blue);
+  transform: scale(1.08);
+}
+.mini-cell.drop-slot.correct {
+  border: 2px solid var(--green);
+  background: #ECFDF5;
+  color: var(--green);
+  animation: correctBounce 0.5s ease;
+}
+
+/* 數字卡區 */
+.pos-cards-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 16px;
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 90px;
+  align-content: center;
+}
+.num-card {
+  min-width: 52px;
+  height: 52px;
+  padding: 0 10px;
+  background: var(--blue);
+  color: white;
+  border-radius: 10px;
+  font-size: clamp(14px, 4vw, 20px);
   font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.2), 0 2px 8px rgba(91,141,239,0.35);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  user-select: none;
+  touch-action: none;
+  border-bottom: 4px solid rgba(0,0,0,0.2);
 }
-.pos-question-text {
-  font-size: 20px;
-  font-weight: 800;
-  text-align: center;
-  line-height: 1.5;
+.num-card:active, .num-card.dragging {
+  cursor: grabbing;
+  transform: scale(1.12) rotate(3deg);
+  box-shadow: 0 8px 20px rgba(91,141,239,0.5);
+  opacity: 0.85;
+  z-index: 1000;
 }
-.pos-question-text strong {
-  color: var(--blue);
-  font-size: 24px;
+.num-card.shake {
+  animation: shake 0.4s ease;
+}
+.num-card.placed {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0);
+  transition: all 0.2s ease;
+}
+
+/* 浮動拖拉中的卡片複本 */
+#dragGhost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%) scale(1.15) rotate(3deg);
+  opacity: 0.9;
+  transition: none;
+}
+
+/* Confetti */
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9998;
+  animation: confettiFall 1.2s ease-out forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
 /* ==================== Responsive ==================== */
@@ -765,7 +848,7 @@ img.emoji {
       <div class="menu-card-icon">🎯</div>
       <div class="menu-card-body">
         <div class="menu-card-title" style="color:var(--purple)">數字位置</div>
-        <div class="menu-card-desc">在千數表找到數字的位置</div>
+        <div class="menu-card-desc">把數字卡拖到千數表的正確位置</div>
       </div>
       <svg class="icon menu-card-chevron"><use href="#icon-chevron-right"/></svg>
     </div>
@@ -866,15 +949,14 @@ img.emoji {
       </div>
     </div>
 
-    <div class="card">
-      <div class="mini-chart" id="miniChart"></div>
+    <div class="card pos-chart-card" id="posChartCard">
+      <div class="pos-label" id="posLabel">把數字卡拖到正確的位置 🎯</div>
+      <div class="mini-chart" id="posChart"></div>
     </div>
 
-    <div class="card">
-      <div class="pos-question-text" id="posQuestion">題目文字</div>
+    <div class="pos-cards-area" id="posCardsArea">
+      <!-- 數字卡動態生成 -->
     </div>
-
-    <div class="options-grid" id="posOptions"></div>
   </div>
 
 </div>
@@ -908,6 +990,9 @@ function sfxWrong() {
 }
 function sfxClick() {
   tone(880, 0.07, 'sine', 0.14);
+}
+function sfxCelebrate() {
+  [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.3, 'sine', 0.25, i * 0.1));
 }
 
 // ==================== Screen Navigation ====================
@@ -1175,6 +1260,23 @@ function goMenu() {
   showScreen('screen-menu');
 }
 
+function spawnConfetti() {
+  const colors = ['#FFD93D', '#5B8DEF', '#22C55E', '#EF4444', '#9B5DE5', '#FF6B6B'];
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = '-10px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.5 + 's';
+    piece.style.animationDuration = (1 + Math.random() * 0.5) + 's';
+    piece.style.width = (6 + Math.random() * 8) + 'px';
+    piece.style.height = (6 + Math.random() * 8) + 'px';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 2000);
+  }
+}
+
 // ==================== Skip Counting Game ====================
 let skipStars = 0;
 let skipRound = 0;
@@ -1374,164 +1476,240 @@ function showSkipResult() {
   }
 }
 
-// ==================== Position Game ====================
+// ==================== Position Game (Drag & Drop) ====================
+const POS_ROUNDS = 8;
+let posQ = 0;
 let posStars = 0;
-let posRound = 0;
-const POS_ROUNDS = 10;
-let posActive = false;
-let posAnswer = null;
-let posTargetN = null;
+let posCorrect = 0;
+let posAnswers = {};
+let posBlanks = [];
+let posTotalBlanks = 0;
 
-function startPosition() {
-  posStars = 0;
-  posRound = 0;
-  posActive = true;
-  showScreen('screen-position');
-  nextPosQuestion();
-}
+// ── Drag state ──
+let activeCard = null;
+let ghost = null;
 
-function nextPosQuestion() {
-  posRound++;
-  if (posRound > POS_ROUNDS) {
-    showPosResult();
-    return;
-  }
+// ── Generate question ──
+function generatePosQuestion() {
+  const startRow = 1 + Math.floor(Math.random() * 98);
+  const rows = [startRow, startRow + 1, startRow + 2];
 
-  document.getElementById('posProgress').style.width = `${((posRound - 1) / POS_ROUNDS) * 100}%`;
-  document.getElementById('posStars').textContent = posStars;
-
-  // Alternate: odd rounds = type A, even rounds = type B
-  const isTypeA = posRound % 2 === 1;
-  const n = Math.floor(Math.random() * 1000) + 1;
-  posTargetN = n;
-  const row = Math.ceil(n / 10);
-  const col = n % 10 === 0 ? 10 : n % 10;
-
-  if (isTypeA) {
-    // Type A: given number, guess position
-    renderMiniChart(n, false);
-    document.getElementById('posQuestion').innerHTML =
-      `<strong>${n}</strong> 在千數表的<br>第幾行、第幾個？`;
-
-    const correctLabel = `第 ${row} 行，第 ${col} 個`;
-    posAnswer = correctLabel;
-
-    const choices = new Set([correctLabel]);
-    while (choices.size < 4) {
-      const rOff = Math.floor(Math.random() * 5) - 2;
-      const cOff = Math.floor(Math.random() * 5) - 2;
-      const fakeR = row + rOff;
-      const fakeC = col + cOff;
-      if (fakeR >= 1 && fakeR <= 100 && fakeC >= 1 && fakeC <= 10 && !(rOff === 0 && cOff === 0)) {
-        choices.add(`第 ${fakeR} 行，第 ${fakeC} 個`);
-      }
-    }
-    const shuffled = [...choices].sort(() => Math.random() - 0.5);
-
-    const grid = document.getElementById('posOptions');
-    grid.innerHTML = shuffled.map(c =>
-      `<button class="option-btn" onclick="checkPosAnswer(this, '${c}')">${c}</button>`
-    ).join('');
-  } else {
-    // Type B: given position, guess number
-    renderMiniChart(n, false);
-    document.getElementById('posQuestion').innerHTML =
-      `第 <strong>${row}</strong> 行，第 <strong>${col}</strong> 個<br>是哪個數字？`;
-
-    posAnswer = String(n);
-
-    const choices = new Set([n]);
-    while (choices.size < 4) {
-      const rOff = Math.floor(Math.random() * 5) - 2;
-      const cOff = Math.floor(Math.random() * 5) - 2;
-      const fakeN = (row + rOff - 1) * 10 + (col + cOff);
-      if (fakeN >= 1 && fakeN <= 1000 && fakeN !== n) {
-        choices.add(fakeN);
-      }
-    }
-    const shuffled = [...choices].sort(() => Math.random() - 0.5);
-
-    const grid = document.getElementById('posOptions');
-    grid.innerHTML = shuffled.map(c =>
-      `<button class="option-btn" data-val="${c}" onclick="checkPosAnswer(this, '${c}')">${c}</button>`
-    ).join('');
-  }
-}
-
-function renderMiniChart(targetN, revealTarget) {
-  const targetRow = Math.ceil(targetN / 10);
-  const startRow = Math.max(1, targetRow - 1);
-  const endRow = Math.min(100, targetRow + 1);
-  const mini = document.getElementById('miniChart');
-  mini.innerHTML = '';
-  for (let row = startRow; row <= endRow; row++) {
+  const allNums = [];
+  rows.forEach(row => {
     for (let col = 1; col <= 10; col++) {
       const n = (row - 1) * 10 + col;
-      if (n > 1000) continue;
-      const cell = document.createElement('div');
-      cell.className = 'mini-cell';
-      if (n === targetN) {
-        cell.classList.add(revealTarget ? 'mini-highlight' : 'mini-hidden');
-        cell.textContent = revealTarget ? n : '？';
-      } else {
-        cell.textContent = n;
-      }
-      mini.appendChild(cell);
+      if (n >= 1 && n <= 1000) allNums.push(n);
     }
+  });
+
+  const count = 3 + Math.floor(Math.random() * 3); // 3~5
+  const shuffled = [...allNums].sort(() => Math.random() - 0.5);
+  posBlanks = shuffled.slice(0, count).sort((a, b) => a - b);
+
+  posCorrect = 0;
+  posAnswers = {};
+  posTotalBlanks += count;
+
+  // Restore card HTML in case it was replaced by result screen
+  const chartCard = document.getElementById('posChartCard');
+  if (!document.getElementById('posChart')) {
+    chartCard.innerHTML =
+      '<div class="pos-label" id="posLabel">把數字卡拖到正確的位置 🎯</div>' +
+      '<div class="mini-chart" id="posChart"></div>';
+    if (typeof twemoji !== 'undefined') {
+      twemoji.parse(chartCard, { folder: 'svg', ext: '.svg' });
+    }
+  }
+  document.getElementById('posLabel').textContent = '把數字卡拖到正確的位置 🎯';
+  if (typeof twemoji !== 'undefined') {
+    twemoji.parse(document.getElementById('posLabel'), { folder: 'svg', ext: '.svg' });
+  }
+
+  renderPosChart(allNums);
+  renderPosCards();
+}
+
+// ── Render Mini Chart ──
+function renderPosChart(allNums) {
+  const chart = document.getElementById('posChart');
+  chart.innerHTML = '';
+  allNums.forEach(n => {
+    const cell = document.createElement('div');
+    if (posBlanks.includes(n)) {
+      cell.className = 'mini-cell drop-slot';
+      cell.textContent = '？';
+      cell.dataset.answer = n;
+      cell.id = 'slot-' + n;
+    } else {
+      cell.className = 'mini-cell';
+      cell.textContent = n;
+    }
+    chart.appendChild(cell);
+  });
+}
+
+// ── Render number cards ──
+function renderPosCards() {
+  const area = document.getElementById('posCardsArea');
+  area.innerHTML = '';
+  area.style.display = '';
+  const shuffled = [...posBlanks].sort(() => Math.random() - 0.5);
+  shuffled.forEach(n => {
+    const card = document.createElement('div');
+    card.className = 'num-card';
+    card.textContent = n;
+    card.dataset.value = n;
+    card.id = 'card-' + n;
+    setupDrag(card);
+    area.appendChild(card);
+  });
+}
+
+// ── Pointer Events drag ──
+function setupDrag(card) {
+  card.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (card.classList.contains('placed')) return;
+
+    activeCard = card;
+    card.setPointerCapture(e.pointerId);
+    card.classList.add('dragging');
+
+    // Create ghost
+    ghost = card.cloneNode(true);
+    ghost.id = 'dragGhost';
+    ghost.style.width = card.offsetWidth + 'px';
+    ghost.style.height = card.offsetHeight + 'px';
+    document.body.appendChild(ghost);
+    moveGhost(e.clientX, e.clientY);
+  });
+
+  card.addEventListener('pointermove', e => {
+    if (!activeCard || activeCard !== card) return;
+    e.preventDefault();
+    moveGhost(e.clientX, e.clientY);
+    highlightDropTarget(e.clientX, e.clientY);
+  });
+
+  card.addEventListener('pointerup', e => {
+    if (!activeCard || activeCard !== card) return;
+    e.preventDefault();
+
+    const target = getDropTarget(e.clientX, e.clientY);
+    if (target) {
+      handleDrop(card, target);
+    } else {
+      card.classList.remove('dragging');
+    }
+    cleanupDrag();
+  });
+
+  card.addEventListener('pointercancel', () => {
+    if (activeCard === card) {
+      card.classList.remove('dragging');
+      cleanupDrag();
+    }
+  });
+}
+
+function moveGhost(x, y) {
+  if (!ghost) return;
+  ghost.style.left = x + 'px';
+  ghost.style.top = y + 'px';
+}
+
+function cleanupDrag() {
+  if (ghost) { ghost.remove(); ghost = null; }
+  if (activeCard) { activeCard.classList.remove('dragging'); }
+  activeCard = null;
+  document.querySelectorAll('.drop-slot').forEach(s => s.classList.remove('drag-over'));
+}
+
+function highlightDropTarget(x, y) {
+  document.querySelectorAll('.drop-slot').forEach(slot => {
+    const r = slot.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+      slot.classList.add('drag-over');
+    } else {
+      slot.classList.remove('drag-over');
+    }
+  });
+}
+
+function getDropTarget(x, y) {
+  const slots = document.querySelectorAll('.drop-slot:not(.correct)');
+  for (const slot of slots) {
+    const r = slot.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return slot;
+  }
+  return null;
+}
+
+function handleDrop(card, slot) {
+  const cardVal = +card.dataset.value;
+  const slotAns = +slot.dataset.answer;
+
+  if (cardVal === slotAns) {
+    // Correct!
+    slot.classList.remove('drop-slot', 'drag-over');
+    slot.classList.add('correct');
+    slot.textContent = cardVal;
+    card.classList.add('placed');
+    sfxCorrect();
+    posCorrect++;
+    posStars++;
+    document.getElementById('posStars').textContent = posStars;
+
+    // Check if all slots filled
+    const remaining = document.querySelectorAll('.drop-slot:not(.correct)').length;
+    if (remaining === 0) {
+      setTimeout(() => {
+        spawnConfetti();
+        sfxCelebrate();
+        posQ++;
+        document.getElementById('posProgress').style.width = (posQ / POS_ROUNDS * 100) + '%';
+        if (posQ >= POS_ROUNDS) {
+          setTimeout(showPosResult, 800);
+        } else {
+          setTimeout(generatePosQuestion, 1200);
+        }
+      }, 600);
+    }
+  } else {
+    // Wrong!
+    card.classList.add('shake');
+    card.classList.remove('dragging');
+    sfxWrong();
+    setTimeout(() => card.classList.remove('shake'), 500);
   }
 }
 
-function checkPosAnswer(btn, val) {
-  if (!posActive) return;
-  const buttons = document.querySelectorAll('#posOptions .option-btn');
-  buttons.forEach(b => b.disabled = true);
-
-  if (val === posAnswer) {
-    btn.classList.add('correct');
-    sfxCorrect();
-    posStars++;
-    document.getElementById('posStars').textContent = posStars;
-  } else {
-    btn.classList.add('wrong');
-    sfxWrong();
-    buttons.forEach(b => {
-      // Find the correct button
-      if (b.textContent === posAnswer || b.dataset.val === posAnswer) {
-        b.classList.add('show-correct');
-      }
-    });
-  }
-
-  // Reveal target on mini chart
-  renderMiniChart(posTargetN, true);
-
-  setTimeout(() => {
-    nextPosQuestion();
-  }, 1200);
+function startPosition() {
+  initAudio(); sfxClick();
+  posQ = 0; posStars = 0; posTotalBlanks = 0;
+  document.getElementById('posStars').textContent = 0;
+  document.getElementById('posProgress').style.width = '0%';
+  generatePosQuestion();
+  showScreen('screen-position');
 }
 
 function showPosResult() {
-  posActive = false;
   totalStars += posStars;
   document.getElementById('posProgress').style.width = '100%';
   document.getElementById('posStars').textContent = posStars;
 
   let msg = '';
-  if (posStars === POS_ROUNDS) msg = '太厲害了！滿分！🎉';
-  else if (posStars >= POS_ROUNDS * 0.8) msg = '好棒！快要滿分了！';
-  else if (posStars >= POS_ROUNDS * 0.5) msg = '不錯喔！繼續加油！';
+  if (posStars >= posTotalBlanks) msg = '太厲害了！全部答對！🎉';
+  else if (posStars >= posTotalBlanks * 0.8) msg = '好棒！快要滿分了！';
+  else if (posStars >= posTotalBlanks * 0.5) msg = '不錯喔！繼續加油！';
   else msg = '再練習一下，你可以的！💪';
 
-  document.getElementById('miniChart').innerHTML = '';
-  document.getElementById('posQuestion').innerHTML = `
+  const chartCard = document.getElementById('posChartCard');
+  document.getElementById('posCardsArea').style.display = 'none';
+  chartCard.innerHTML = `
     <div class="result-area">
       <div class="result-trophy">🏆</div>
       <div class="result-score">得到 ${posStars} 顆星星！</div>
-      <div class="result-stars">
-        ${Array.from({length: POS_ROUNDS}, (_, i) =>
-          `<svg class="icon-lg ${i < posStars ? '' : 'empty'}"><use href="#icon-star"/></svg>`
-        ).join('')}
-      </div>
       <div class="result-msg">${msg}</div>
       <div class="result-buttons">
         <button class="btn btn-purple" onclick="startPosition();">
@@ -1545,10 +1723,9 @@ function showPosResult() {
       </div>
     </div>
   `;
-  document.getElementById('posOptions').innerHTML = '';
 
   if (typeof twemoji !== 'undefined') {
-    twemoji.parse(document.getElementById('posQuestion'), { folder: 'svg', ext: '.svg' });
+    twemoji.parse(chartCard, { folder: 'svg', ext: '.svg' });
   }
 }
 
