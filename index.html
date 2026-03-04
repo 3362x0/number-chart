@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@flaticon/flaticon-uicons@3/css/all/all.css">
 <script src="https://cdn.jsdelivr.net/npm/@lottiefiles/lottie-player@2/dist/lottie-player.js"></script>
-<!-- OpenMoji: 輕量自製 parser，無需額外 JS library -->
+<!-- icons: Flaticon Uicons (靜態) + LottieFiles (動態) -->
 <style>
 :root {
   --bg: #FAFAFA;
@@ -465,7 +465,7 @@ body {
   flex: 1;
   padding: 24px 0;
 }
-.result-trophy { font-size: 64px; }
+.result-trophy { display: flex; justify-content: center; }
 .result-score {
   font-size: 28px;
   font-weight: 900;
@@ -755,15 +755,7 @@ body {
   }
 }
 
-/* OpenMoji emoji img */
-img.emoji {
-  height: 1em;
-  width: 1em;
-  margin: 0 .05em 0 .1em;
-  vertical-align: -0.1em;
-}
-.welcome-mascot img.emoji { height: 80px; width: 80px; }
-.menu-card-icon img.emoji { height: 40px; width: 40px; }
+/* icons: Flaticon Uicons (static) + LottieFiles (animated) */
 </style>
 </head>
 <body>
@@ -778,7 +770,7 @@ img.emoji {
       <lottie-player src="https://assets-v2.lottiefiles.com/a/5a41dca4-117d-11ee-a1b0-f792db995a62/IXKI0ODgd2.json" autoplay loop style="width:160px;height:160px"></lottie-player>
     </div>
     <div class="welcome-title">千數探險家</div>
-    <div class="welcome-sub">和 🦕 一起探索 1 到 1000！</div>
+    <div class="welcome-sub">一起探索 1 到 1000！</div>
     <button class="btn btn-blue welcome-btn" onclick="initAudio(); showScreen('screen-menu');">
       開始探險！
     </button>
@@ -836,7 +828,7 @@ img.emoji {
       <button class="btn-back" onclick="showScreen('screen-menu');">
         <i class="fi fi-rr-arrow-left icon"></i>
       </button>
-      <div class="explore-title">千數表 🗺️</div>
+      <div class="explore-title">千數表 <i class="fi fi-rr-map-location-track icon" style="color:var(--orange)"></i></div>
       <button class="explore-toggle" onclick="toggleViewMode();">
         <i class="fi fi-rr-apps icon icon-sm"></i>
         <span id="toggle-label">全覽</span>
@@ -922,7 +914,7 @@ img.emoji {
     </div>
 
     <div class="card pos-chart-card" id="posChartCard">
-      <div class="pos-label" id="posLabel">把數字卡拖到正確的位置 🎯</div>
+      <div class="pos-label" id="posLabel">把數字卡拖到正確的位置 <i class="fi fi-rr-target icon" style="color:var(--green)"></i></div>
       <div class="mini-chart" id="posChart"></div>
     </div>
 
@@ -934,53 +926,7 @@ img.emoji {
 </div>
 
 <script>
-/* ============================================================
-   OPENMOJI ENGINE
-   輕量自製 emoji → OpenMoji SVG 替換器（無外部 JS library）
-   CDN: cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/{CODEPOINT}.svg
-============================================================ */
-const OM_CDN = 'https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/';
-
-function emojiCp(s) {
-  return [...s].map(c => c.codePointAt(0).toString(16).toUpperCase()).join('-');
-}
-
-function makeEmojiImg(em, styleStr) {
-  const img = document.createElement('img');
-  img.src  = OM_CDN + emojiCp(em) + '.svg';
-  img.alt  = em;
-  img.className = 'emoji';
-  img.style.cssText = styleStr;
-  img.onerror = function() {
-    const stripped = em.replace(/[\uFE0F\uFE0E]/g, '');
-    const fallback  = OM_CDN + emojiCp(stripped) + '.svg';
-    if (img.src !== fallback) { img.src = fallback; img.onerror = null; }
-  };
-  return img;
-}
-
-const EMOJI_RE = /(?:[\u{1F1E0}-\u{1F1FF}]{2}|\p{Extended_Pictographic}(?:\uFE0F)?(?:\u20E3)?(?:\u200D(?:\p{Extended_Pictographic}(?:\uFE0F)?(?:\u20E3)?))*)/gsu;
-
-function parseEmoji(root, styleStr = 'height:1em;width:1em;margin:0 .05em 0 .1em;vertical-align:-0.1em;object-fit:contain;display:inline-block;') {
-  if (!root) return;
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
-  const nodes = [];
-  let n;
-  while ((n = walker.nextNode())) nodes.push(n);
-  nodes.forEach(node => {
-    if (!EMOJI_RE.test(node.textContent)) return;
-    EMOJI_RE.lastIndex = 0;
-    const frag = document.createDocumentFragment();
-    let last = 0, m;
-    while ((m = EMOJI_RE.exec(node.textContent)) !== null) {
-      if (m.index > last) frag.appendChild(document.createTextNode(node.textContent.slice(last, m.index)));
-      frag.appendChild(makeEmojiImg(m[0], styleStr));
-      last = m.index + m[0].length;
-    }
-    if (last < node.textContent.length) frag.appendChild(document.createTextNode(node.textContent.slice(last)));
-    node.parentNode?.replaceChild(frag, node);
-  });
-}
+// OpenMoji 已移除：icons → Flaticon Uicons，animations → LottieFiles
 
 // ==================== Audio ====================
 let AC = null;
@@ -1028,8 +974,6 @@ function showScreen(id) {
     document.getElementById('total-stars').textContent = totalStars;
   }
 
-  // OpenMoji parse
-  parseEmoji(el);
 }
 
 // ==================== Explore: Number Chart ====================
@@ -1245,7 +1189,7 @@ function showResult() {
   const content = document.getElementById('game-content');
   content.innerHTML = `
     <div class="result-area">
-      <div class="result-trophy">🏆</div>
+      <div class="result-trophy"><lottie-player src="https://assets-v2.lottiefiles.com/a/c91264f0-c116-4547-90fa-328b7e2a0c0a/1mo3C04OXC.json" autoplay loop style="width:64px;height:64px"></lottie-player></div>
       <div class="result-score">得到 ${gameStars} 顆星星！</div>
       <div class="result-stars">
         ${Array.from({length: 10}, (_, i) =>
@@ -1266,8 +1210,6 @@ function showResult() {
     </div>
   `;
 
-  // Parse OpenMoji for result
-  parseEmoji(content);
 }
 
 // ==================== Shared Helpers ====================
@@ -1465,7 +1407,7 @@ function showSkipResult() {
   const card = document.getElementById('skipCard');
   card.innerHTML = `
     <div class="result-area">
-      <div class="result-trophy">🏆</div>
+      <div class="result-trophy"><lottie-player src="https://assets-v2.lottiefiles.com/a/c91264f0-c116-4547-90fa-328b7e2a0c0a/1mo3C04OXC.json" autoplay loop style="width:64px;height:64px"></lottie-player></div>
       <div class="result-score">得到 ${skipStars} 顆星星！</div>
       <div class="result-stars">
         ${Array.from({length: maxStars}, (_, i) =>
@@ -1487,7 +1429,6 @@ function showSkipResult() {
   `;
   document.getElementById('skipOptions').innerHTML = '';
 
-  parseEmoji(card);
 }
 
 // ==================== Position Game (Drag & Drop) ====================
@@ -1528,12 +1469,10 @@ function generatePosQuestion() {
   const chartCard = document.getElementById('posChartCard');
   if (!document.getElementById('posChart')) {
     chartCard.innerHTML =
-      '<div class="pos-label" id="posLabel">把數字卡拖到正確的位置 🎯</div>' +
+      '<div class="pos-label" id="posLabel">把數字卡拖到正確的位置 <i class="fi fi-rr-target icon" style="color:var(--green)"></i></div>' +
       '<div class="mini-chart" id="posChart"></div>';
-    parseEmoji(chartCard);
   }
-  document.getElementById('posLabel').textContent = '把數字卡拖到正確的位置 🎯';
-  parseEmoji(document.getElementById('posLabel'));
+  document.getElementById('posLabel').innerHTML = '把數字卡拖到正確的位置 <i class="fi fi-rr-target icon" style="color:var(--green)"></i>';
 
   renderPosChart(allNums);
   renderPosCards();
@@ -1718,7 +1657,7 @@ function showPosResult() {
   document.getElementById('posCardsArea').style.display = 'none';
   chartCard.innerHTML = `
     <div class="result-area">
-      <div class="result-trophy">🏆</div>
+      <div class="result-trophy"><lottie-player src="https://assets-v2.lottiefiles.com/a/c91264f0-c116-4547-90fa-328b7e2a0c0a/1mo3C04OXC.json" autoplay loop style="width:64px;height:64px"></lottie-player></div>
       <div class="result-score">得到 ${posStars} 顆星星！</div>
       <div class="result-msg">${msg}</div>
       <div class="result-buttons">
@@ -1734,13 +1673,11 @@ function showPosResult() {
     </div>
   `;
 
-  parseEmoji(chartCard);
 }
 
 // ==================== Init ====================
 document.addEventListener('DOMContentLoaded', () => {
-  // 頁面載入後套用 OpenMoji
-  parseEmoji(document.getElementById('screen-welcome'));
+  // 初始化完成（OpenMoji 已移除）
 });
 </script>
 </body>
