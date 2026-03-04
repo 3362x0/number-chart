@@ -774,12 +774,12 @@ function highlightNeighbors(n) {
 function updateInfoBar(n) {
   const bar = document.getElementById('info-bar');
   let parts = [`選了 <strong>${n}</strong>`];
-  if (n - 1 >= 1) parts.push(`前一個：${n-1}`);
-  if (n + 1 <= 1000) parts.push(`後一個：${n+1}`);
-  if (n - 10 >= 1) parts.push(`上一個：${n-10}`);
-  if (n + 10 <= 1000) parts.push(`下一個：${n+10}`);
-  if (n - 100 >= 1) parts.push(`前百：${n-100}`);
-  if (n + 100 <= 1000) parts.push(`後百：${n+100}`);
+  if (n - 1 >= 1) parts.push(`－1：${n-1}`);
+  if (n + 1 <= 1000) parts.push(`＋1：${n+1}`);
+  if (n - 10 >= 1) parts.push(`－10：${n-10}`);
+  if (n + 10 <= 1000) parts.push(`＋10：${n+10}`);
+  if (n - 100 >= 1) parts.push(`－100：${n-100}`);
+  if (n + 100 <= 1000) parts.push(`＋100：${n+100}`);
   bar.innerHTML = parts.join('｜');
 }
 
@@ -809,12 +809,12 @@ let currentAnswer = null;
 let gameActive = false;
 
 const questionTypes = [
-  { text: (x) => `${x} 的前一個是？`, calc: (x) => x - 1 },
-  { text: (x) => `${x} 的後一個是？`, calc: (x) => x + 1 },
-  { text: (x) => `${x} 的上一個是？`, calc: (x) => x - 10 },
-  { text: (x) => `${x} 的下一個是？`, calc: (x) => x + 10 },
-  { text: (x) => `${x} 往前一百是？`, calc: (x) => x - 100 },
-  { text: (x) => `${x} 往後一百是？`, calc: (x) => x + 100 },
+  { text: (x) => `${x} － 1 是多少？`, calc: (x) => x - 1 },
+  { text: (x) => `${x} ＋ 1 是多少？`, calc: (x) => x + 1 },
+  { text: (x) => `${x} － 10 是多少？`, calc: (x) => x - 10 },
+  { text: (x) => `${x} ＋ 10 是多少？`, calc: (x) => x + 10 },
+  { text: (x) => `${x} － 100 是多少？`, calc: (x) => x - 100 },
+  { text: (x) => `${x} ＋ 100 是多少？`, calc: (x) => x + 100 },
 ];
 
 function startNeighborGame() {
