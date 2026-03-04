@@ -1457,7 +1457,7 @@ function generatePosQuestion() {
     }
   });
 
-  const count = 3 + Math.floor(Math.random() * 3); // 3~5
+  const count = 5; // 固定 5 個填空題
   const shuffled = [...allNums].sort(() => Math.random() - 0.5);
   posBlanks = shuffled.slice(0, count).sort((a, b) => a - b);
 
