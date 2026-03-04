@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>千數探險家</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<style>
+:root {
+  --bg: #FAFAFA;
+  --white: #FFFFFF;
+  --text: #1A1A2E;
+  --muted: #6B7280;
+  --border: #E5E7EB;
+
+  --selected: #FFD93D;
+  --border-selected: #F59E0B;
+  --neighbor-1: #A7F3D0;
+  --border-1: #10B981;
+  --neighbor-10: #BBF7D0;
+  --border-10: #22C55E;
+  --neighbor-100: #E9D5FF;
+  --border-100: #9B5DE5;
+
+  --blue: #5B8DEF;
+  --green: #22C55E;
+  --red: #EF4444;
+  --yellow: #FFD93D;
+  --purple: #9B5DE5;
+
+  --radius: 12px;
+  --radius-sm: 6px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+}
+
+#app {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 16px;
+  min-height: 100dvh;
+}
+
+/* Screens */
+.screen { display: none; }
+.screen.active {
+  display: flex;
+  flex-direction: column;
+  animation: pageEnter 0.3s cubic-bezier(0.34,1.2,0.64,1);
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Buttons */
+.btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  border: 2px solid;
+  border-radius: var(--radius);
+  padding: 12px 24px;
+  cursor: pointer;
+  background: var(--white);
+  transition: transform 0.1s, border-bottom-width 0.1s;
+  border-bottom-width: 4px;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn:active {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
+}
+.btn-blue { color: var(--blue); border-color: var(--blue); }
+.btn-green { color: var(--green); border-color: var(--green); }
+.btn-red { color: var(--red); border-color: var(--red); }
+.btn-purple { color: var(--purple); border-color: var(--purple); }
+.btn-muted { color: var(--muted); border-color: var(--border); }
+
+.icon { width: 20px; height: 20px; display: inline-block; vertical-align: middle; }
+.icon-sm { width: 16px; height: 16px; }
+.icon-lg { width: 28px; height: 28px; }
+
+/* ==================== Welcome ==================== */
+#screen-welcome {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  min-height: 100dvh;
+}
+.welcome-mascot {
+  font-size: 80px;
+  line-height: 1;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+.welcome-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--text);
+}
+.welcome-sub {
+  font-size: 18px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.welcome-btn {
+  margin-top: 12px;
+  font-size: 20px;
+  padding: 14px 40px;
+}
+
+/* ==================== Menu ==================== */
+#screen-menu {
+  gap: 16px;
+  padding-top: 24px;
+}
+.menu-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.menu-header .btn-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  padding: 4px;
+}
+.menu-title {
+  font-size: 24px;
+  font-weight: 900;
+}
+.menu-card {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  opacity: 0;
+  animation: cardEnter 0.35s ease forwards;
+}
+.menu-card:nth-child(2) { animation-delay: 80ms; }
+.menu-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.menu-card-icon { font-size: 40px; flex-shrink: 0; }
+.menu-card-body { flex: 1; }
+.menu-card-title { font-size: 18px; font-weight: 900; }
+.menu-card-desc { font-size: 13px; color: var(--muted); font-weight: 700; margin-top: 2px; }
+.menu-card-chevron { color: var(--muted); flex-shrink: 0; }
+.menu-stars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--yellow);
+  margin-top: 8px;
+}
+.menu-stars svg { color: var(--yellow); }
+
+/* ==================== Explore ==================== */
+#screen-explore {
+  gap: 12px;
+}
+.explore-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.explore-header .btn-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  padding: 4px;
+}
+.explore-title { font-size: 20px; font-weight: 900; flex: 1; }
+.explore-toggle {
+  background: none;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-weight: 800;
+  font-size: 16px;
+}
+.page-nav button {
+  background: none;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.page-nav button:disabled { opacity: 0.3; cursor: default; }
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+}
+.cell {
+  aspect-ratio: 1;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: clamp(11px, 2.8vw, 15px);
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  user-select: none;
+  color: var(--text);
+  background: var(--white);
+}
+.cell:active { transform: scale(0.9); }
+.cell.selected { background: var(--selected); border-color: var(--border-selected); }
+.cell.n1 { background: var(--neighbor-1); border-color: var(--border-1); }
+.cell.n10 { background: var(--neighbor-10); border-color: var(--border-10); }
+.cell.n100 { background: var(--neighbor-100); border-color: var(--border-100); }
+
+.overview-mode .grid-container {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.overview-mode .cell {
+  font-size: clamp(10px, 2vw, 13px);
+}
+
+.info-bar {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.info-bar strong { color: var(--text); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.legend-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1.5px solid;
+}
+
+/* ==================== Neighbor Game ==================== */
+#screen-neighbor {
+  gap: 16px;
+}
+.neighbor-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.neighbor-header .btn-back {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  padding: 4px;
+}
+.progress-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.progress-bar {
+  flex: 1;
+  height: 12px;
+  background: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  border-radius: 6px;
+  transition: width 0.4s ease;
+  position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.star-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--yellow);
+  flex-shrink: 0;
+}
+.star-count svg { color: var(--yellow); }
+
+.question-area {
+  text-align: center;
+  padding: 24px 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.question-number {
+  font-size: 56px;
+  font-weight: 900;
+  color: var(--blue);
+}
+.question-text {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.choices-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.choice-btn {
+  font-family: 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  min-height: 72px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  border-bottom-width: 4px;
+  background: var(--white);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s, border-color 0.15s;
+  user-select: none;
+  color: var(--text);
+}
+.choice-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+.choice-btn.correct {
+  background: var(--neighbor-1);
+  border-color: var(--border-1);
+  animation: correctBounce 0.4s ease;
+}
+.choice-btn.wrong {
+  background: #FEE2E2;
+  border-color: var(--red);
+  animation: shake 0.35s ease;
+}
+.choice-btn.show-correct {
+  background: var(--neighbor-1);
+  border-color: var(--border-1);
+}
+.choice-btn:disabled { cursor: default; }
+
+@keyframes correctBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.1); }
+  60% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.feedback-icon {
+  font-size: 48px;
+  animation: correctBounce 0.4s ease;
+}
+
+/* Result screen (inside neighbor) */
+.result-area {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 1;
+  padding: 24px 0;
+}
+.result-trophy { font-size: 64px; }
+.result-score {
+  font-size: 28px;
+  font-weight: 900;
+}
+.result-msg {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.result-stars {
+  display: flex;
+  gap: 4px;
+}
+.result-stars svg { color: var(--yellow); width: 28px; height: 28px; }
+.result-stars svg.empty { color: var(--border); }
+.result-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ==================== Responsive ==================== */
+@media (max-width: 479px) {
+  .cell { font-size: clamp(11px, 3vw, 13px); }
+  .grid-container { gap: 2px; }
+}
+@media (min-width: 768px) {
+  .cell { font-size: clamp(13px, 2vw, 18px); }
+  .choices-grid { gap: 16px; }
+  .choice-btn { min-height: 80px; font-size: 28px; }
+}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Twemoji sizing */
+img.emoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 .05em 0 .1em;
+  vertical-align: -0.1em;
+}
+.welcome-mascot img.emoji { height: 80px; width: 80px; }
+.menu-card-icon img.emoji { height: 40px; width: 40px; }
+</style>
+</head>
+<body>
+
+<!-- Inline SVG Icons -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 12H5M12 19l-7-7 7-7"/>
+  </symbol>
+  <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+  </symbol>
+  <symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="9 18 15 12 9 6"/>
+  </symbol>
+  <symbol id="icon-rotate-ccw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/>
+  </symbol>
+  <symbol id="icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+  </symbol>
+  <symbol id="icon-x-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+  </symbol>
+  <symbol id="icon-star" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </symbol>
+  <symbol id="icon-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="11"/><path d="M7 4H4a2 2 0 0 0-2 2v1a5 5 0 0 0 5 5h6a5 5 0 0 0 5-5V6a2 2 0 0 0-2-2h-3"/><path d="M7 4V2h10v2"/>
+  </symbol>
+  <symbol id="icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+  </symbol>
+  <symbol id="icon-crosshair" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/>
+  </symbol>
+</svg>
+
+<div id="app">
+
+  <!-- ==================== Welcome ==================== -->
+  <div id="screen-welcome" class="screen active">
+    <div class="welcome-mascot">🦕</div>
+    <div class="welcome-title">千數探險家</div>
+    <div class="welcome-sub">和 🦕 一起探索 1 到 1000！</div>
+    <button class="btn btn-blue welcome-btn" onclick="initAudio(); showScreen('screen-menu');">
+      開始探險！
+    </button>
+  </div>
+
+  <!-- ==================== Menu ==================== -->
+  <div id="screen-menu" class="screen">
+    <div class="menu-header">
+      <button class="btn-back" onclick="showScreen('screen-welcome');">
+        <svg class="icon"><use href="#icon-arrow-left"/></svg>
+      </button>
+      <div class="menu-title">選擇關卡</div>
+    </div>
+    <div class="menu-card" onclick="sfxClick(); showScreen('screen-explore');">
+      <div class="menu-card-icon">🗺️</div>
+      <div class="menu-card-body">
+        <div class="menu-card-title">探索千數表</div>
+        <div class="menu-card-desc">點擊數字，看看它的鄰居在哪裡！</div>
+      </div>
+      <svg class="icon menu-card-chevron"><use href="#icon-chevron-right"/></svg>
+    </div>
+    <div class="menu-card" onclick="sfxClick(); startNeighborGame();">
+      <div class="menu-card-icon">🎯</div>
+      <div class="menu-card-body">
+        <div class="menu-card-title">找鄰居</div>
+        <div class="menu-card-desc">猜猜數字的前後鄰居是誰？</div>
+      </div>
+      <svg class="icon menu-card-chevron"><use href="#icon-chevron-right"/></svg>
+    </div>
+    <div class="menu-stars">
+      <svg class="icon"><use href="#icon-star"/></svg>
+      <span id="total-stars">0</span> 顆星星
+    </div>
+  </div>
+
+  <!-- ==================== Explore ==================== -->
+  <div id="screen-explore" class="screen">
+    <div class="explore-header">
+      <button class="btn-back" onclick="showScreen('screen-menu');">
+        <svg class="icon"><use href="#icon-arrow-left"/></svg>
+      </button>
+      <div class="explore-title">千數表 🗺️</div>
+      <button class="explore-toggle" onclick="toggleViewMode();">
+        <svg class="icon icon-sm"><use href="#icon-grid"/></svg>
+        <span id="toggle-label">全覽</span>
+      </button>
+    </div>
+    <div id="page-nav" class="page-nav">
+      <button onclick="changePage(-1);">&lt;</button>
+      <span id="page-label">1 ~ 100</span>
+      <button onclick="changePage(1);">&gt;</button>
+    </div>
+    <div id="grid-wrap">
+      <div id="grid" class="grid-container"></div>
+    </div>
+    <div id="info-bar" class="info-bar">點擊數字看看它的鄰居吧！</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--selected);border-color:var(--border-selected);"></div>選中</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--neighbor-1);border-color:var(--border-1);"></div>±1</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--neighbor-10);border-color:var(--border-10);"></div>±10</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--neighbor-100);border-color:var(--border-100);"></div>±100</div>
+    </div>
+  </div>
+
+  <!-- ==================== Neighbor Game ==================== -->
+  <div id="screen-neighbor" class="screen">
+    <div class="neighbor-header">
+      <button class="btn-back" onclick="showScreen('screen-menu');">
+        <svg class="icon"><use href="#icon-arrow-left"/></svg>
+      </button>
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="star-count">
+          <svg class="icon"><use href="#icon-star"/></svg>
+          <span id="game-stars">0</span>
+        </div>
+      </div>
+    </div>
+    <div id="game-content"></div>
+  </div>
+
+</div>
+
+<script>
+// ==================== Audio ====================
+let AC = null;
+function initAudio() {
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+}
+function tone(freq, dur, type = 'sine', vol = 0.28, delay = 0) {
+  if (!AC) return;
+  const osc = AC.createOscillator();
+  const gain = AC.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.value = vol;
+  gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + delay + dur);
+  osc.connect(gain);
+  gain.connect(AC.destination);
+  osc.start(AC.currentTime + delay);
+  osc.stop(AC.currentTime + delay + dur);
+}
+function sfxCorrect() {
+  [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, 'sine', 0.3, i * 0.11));
+}
+function sfxWrong() {
+  tone(220, 0.4, 'sawtooth', 0.22);
+  tone(185, 0.35, 'sawtooth', 0.2, 0.15);
+}
+function sfxClick() {
+  tone(880, 0.07, 'sine', 0.14);
+}
+
+// ==================== Screen Navigation ====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+
+  if (id === 'screen-explore') {
+    renderGrid();
+  }
+  if (id === 'screen-menu') {
+    document.getElementById('total-stars').textContent = totalStars;
+  }
+
+  // Twemoji parse
+  if (typeof twemoji !== 'undefined') {
+    twemoji.parse(el, { folder: 'svg', ext: '.svg' });
+  }
+}
+
+// ==================== Explore: Number Chart ====================
+let currentPage = 0; // 0-9
+let viewMode = 'paged'; // 'paged' | 'overview'
+let selectedNum = null;
+const cellMap = new Map();
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const gridWrap = document.getElementById('grid-wrap');
+  grid.innerHTML = '';
+  cellMap.clear();
+
+  if (viewMode === 'paged') {
+    gridWrap.classList.remove('overview-mode');
+    document.getElementById('page-nav').style.display = 'flex';
+    const start = currentPage * 100 + 1;
+    const end = start + 99;
+    document.getElementById('page-label').textContent = `${start} ~ ${end}`;
+
+    // Update nav button states
+    const btns = document.querySelectorAll('#page-nav button');
+    btns[0].disabled = currentPage === 0;
+    btns[1].disabled = currentPage === 9;
+
+    for (let i = start; i <= end; i++) {
+      grid.appendChild(createCell(i));
+    }
+  } else {
+    gridWrap.classList.add('overview-mode');
+    document.getElementById('page-nav').style.display = 'none';
+    for (let i = 1; i <= 1000; i++) {
+      grid.appendChild(createCell(i));
+    }
+  }
+
+  buildCellMap();
+  if (selectedNum !== null) {
+    highlightNeighbors(selectedNum);
+  }
+}
+
+function createCell(n) {
+  const div = document.createElement('div');
+  div.className = 'cell';
+  div.dataset.n = n;
+  div.textContent = n;
+  div.addEventListener('click', () => {
+    sfxClick();
+    if (selectedNum === n) {
+      selectedNum = null;
+      clearHighlight();
+      document.getElementById('info-bar').textContent = '點擊數字看看它的鄰居吧！';
+    } else {
+      selectedNum = n;
+      highlightNeighbors(n);
+    }
+  });
+  return div;
+}
+
+function buildCellMap() {
+  cellMap.clear();
+  document.querySelectorAll('.cell').forEach(c => cellMap.set(+c.dataset.n, c));
+}
+
+function clearHighlight() {
+  cellMap.forEach(c => c.className = 'cell');
+}
+
+function highlightNeighbors(n) {
+  clearHighlight();
+  const sel = cellMap.get(n);
+  if (!sel) return;
+  sel.classList.add('selected');
+  [-1, 1].forEach(d => { if (n+d >= 1 && n+d <= 1000) cellMap.get(n+d)?.classList.add('n1'); });
+  [-10, 10].forEach(d => { if (n+d >= 1 && n+d <= 1000) cellMap.get(n+d)?.classList.add('n10'); });
+  [-100, 100].forEach(d => { if (n+d >= 1 && n+d <= 1000) cellMap.get(n+d)?.classList.add('n100'); });
+  updateInfoBar(n);
+}
+
+function updateInfoBar(n) {
+  const bar = document.getElementById('info-bar');
+  let parts = [`選了 <strong>${n}</strong>`];
+  if (n - 1 >= 1) parts.push(`前一個：${n-1}`);
+  if (n + 1 <= 1000) parts.push(`後一個：${n+1}`);
+  if (n - 10 >= 1) parts.push(`上一個：${n-10}`);
+  if (n + 10 <= 1000) parts.push(`下一個：${n+10}`);
+  if (n - 100 >= 1) parts.push(`前百：${n-100}`);
+  if (n + 100 <= 1000) parts.push(`後百：${n+100}`);
+  bar.innerHTML = parts.join('｜');
+}
+
+function changePage(dir) {
+  sfxClick();
+  currentPage = Math.max(0, Math.min(9, currentPage + dir));
+  selectedNum = null;
+  document.getElementById('info-bar').textContent = '點擊數字看看它的鄰居吧！';
+  renderGrid();
+}
+
+function toggleViewMode() {
+  sfxClick();
+  viewMode = viewMode === 'paged' ? 'overview' : 'paged';
+  document.getElementById('toggle-label').textContent = viewMode === 'paged' ? '全覽' : '分頁';
+  selectedNum = null;
+  document.getElementById('info-bar').textContent = '點擊數字看看它的鄰居吧！';
+  renderGrid();
+}
+
+// ==================== Neighbor Game ====================
+let totalStars = 0;
+let gameStars = 0;
+let gameRound = 0;
+const TOTAL_ROUNDS = 10;
+let currentAnswer = null;
+let gameActive = false;
+
+const questionTypes = [
+  { text: (x) => `${x} 的前一個是？`, calc: (x) => x - 1 },
+  { text: (x) => `${x} 的後一個是？`, calc: (x) => x + 1 },
+  { text: (x) => `${x} 的上一個是？`, calc: (x) => x - 10 },
+  { text: (x) => `${x} 的下一個是？`, calc: (x) => x + 10 },
+  { text: (x) => `${x} 往前一百是？`, calc: (x) => x - 100 },
+  { text: (x) => `${x} 往後一百是？`, calc: (x) => x + 100 },
+];
+
+function startNeighborGame() {
+  gameStars = 0;
+  gameRound = 0;
+  gameActive = true;
+  showScreen('screen-neighbor');
+  nextQuestion();
+}
+
+function nextQuestion() {
+  gameRound++;
+  if (gameRound > TOTAL_ROUNDS) {
+    showResult();
+    return;
+  }
+
+  // Update progress
+  document.getElementById('progress-fill').style.width = `${((gameRound - 1) / TOTAL_ROUNDS) * 100}%`;
+  document.getElementById('game-stars').textContent = gameStars;
+
+  // Random number 100~900 to ensure all neighbors exist
+  const num = Math.floor(Math.random() * 801) + 100;
+  const qType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+  currentAnswer = qType.calc(num);
+
+  // Generate choices: correct + 3 wrong
+  const choices = new Set([currentAnswer]);
+  while (choices.size < 4) {
+    const offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? -1 : 1);
+    const wrong = currentAnswer + offset;
+    if (wrong >= 1 && wrong <= 1000 && wrong !== currentAnswer) {
+      choices.add(wrong);
+    }
+  }
+  const shuffled = [...choices].sort(() => Math.random() - 0.5);
+
+  const content = document.getElementById('game-content');
+  content.innerHTML = `
+    <div class="question-area">
+      <div class="question-number">${num}</div>
+      <div class="question-text">${qType.text(num)}</div>
+    </div>
+    <div class="choices-grid">
+      ${shuffled.map(c => `<button class="choice-btn" data-val="${c}" onclick="checkAnswer(this, ${c})">${c}</button>`).join('')}
+    </div>
+  `;
+}
+
+function checkAnswer(btn, val) {
+  if (!gameActive) return;
+  const buttons = document.querySelectorAll('.choice-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  if (val === currentAnswer) {
+    // Correct
+    btn.classList.add('correct');
+    gameStars++;
+    document.getElementById('game-stars').textContent = gameStars;
+    sfxCorrect();
+  } else {
+    // Wrong
+    btn.classList.add('wrong');
+    sfxWrong();
+    // Show correct answer
+    buttons.forEach(b => {
+      if (+b.dataset.val === currentAnswer) b.classList.add('show-correct');
+    });
+  }
+
+  setTimeout(() => {
+    nextQuestion();
+  }, 1200);
+}
+
+function showResult() {
+  gameActive = false;
+  totalStars += gameStars;
+  document.getElementById('progress-fill').style.width = '100%';
+
+  let msg = '';
+  if (gameStars === 10) msg = '太厲害了！滿分！🎉';
+  else if (gameStars >= 8) msg = '好棒！快要滿分了！';
+  else if (gameStars >= 5) msg = '不錯喔！繼續加油！';
+  else msg = '再練習一下，你可以的！💪';
+
+  const content = document.getElementById('game-content');
+  content.innerHTML = `
+    <div class="result-area">
+      <div class="result-trophy">🏆</div>
+      <div class="result-score">得到 ${gameStars} 顆星星！</div>
+      <div class="result-stars">
+        ${Array.from({length: 10}, (_, i) =>
+          `<svg class="icon-lg ${i < gameStars ? '' : 'empty'}"><use href="#icon-star"/></svg>`
+        ).join('')}
+      </div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-buttons">
+        <button class="btn btn-purple" onclick="startNeighborGame();">
+          <svg class="icon"><use href="#icon-rotate-ccw"/></svg>
+          再玩一次
+        </button>
+        <button class="btn btn-muted" onclick="showScreen('screen-menu');">
+          <svg class="icon"><use href="#icon-home"/></svg>
+          回選單
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Parse twemoji for result
+  if (typeof twemoji !== 'undefined') {
+    twemoji.parse(content, { folder: 'svg', ext: '.svg' });
+  }
+}
+
+// ==================== Init ====================
+document.addEventListener('DOMContentLoaded', () => {
+  // Parse twemoji on welcome screen
+  if (typeof twemoji !== 'undefined') {
+    twemoji.parse(document.getElementById('screen-welcome'), { folder: 'svg', ext: '.svg' });
+  }
+});
+</script>
+</body>
+</html>
