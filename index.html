@@ -6,7 +6,7 @@
 <title>千數探險家</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
+<!-- OpenMoji: 輕量自製 parser，無需額外 JS library -->
 <style>
 :root {
   --bg: #FAFAFA;
@@ -753,7 +753,7 @@ body {
   }
 }
 
-/* Twemoji sizing */
+/* OpenMoji emoji img */
 img.emoji {
   height: 1em;
   width: 1em;
@@ -962,6 +962,54 @@ img.emoji {
 </div>
 
 <script>
+/* ============================================================
+   OPENMOJI ENGINE
+   輕量自製 emoji → OpenMoji SVG 替換器（無外部 JS library）
+   CDN: cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/{CODEPOINT}.svg
+============================================================ */
+const OM_CDN = 'https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/';
+
+function emojiCp(s) {
+  return [...s].map(c => c.codePointAt(0).toString(16).toUpperCase()).join('-');
+}
+
+function makeEmojiImg(em, styleStr) {
+  const img = document.createElement('img');
+  img.src  = OM_CDN + emojiCp(em) + '.svg';
+  img.alt  = em;
+  img.className = 'emoji';
+  img.style.cssText = styleStr;
+  img.onerror = function() {
+    const stripped = em.replace(/[\uFE0F\uFE0E]/g, '');
+    const fallback  = OM_CDN + emojiCp(stripped) + '.svg';
+    if (img.src !== fallback) { img.src = fallback; img.onerror = null; }
+  };
+  return img;
+}
+
+const EMOJI_RE = /(?:[\u{1F1E0}-\u{1F1FF}]{2}|\p{Extended_Pictographic}(?:\uFE0F)?(?:\u20E3)?(?:\u200D(?:\p{Extended_Pictographic}(?:\uFE0F)?(?:\u20E3)?))*)/gsu;
+
+function parseEmoji(root, styleStr = 'height:1em;width:1em;margin:0 .05em 0 .1em;vertical-align:-0.1em;object-fit:contain;display:inline-block;') {
+  if (!root) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+  const nodes = [];
+  let n;
+  while ((n = walker.nextNode())) nodes.push(n);
+  nodes.forEach(node => {
+    if (!EMOJI_RE.test(node.textContent)) return;
+    EMOJI_RE.lastIndex = 0;
+    const frag = document.createDocumentFragment();
+    let last = 0, m;
+    while ((m = EMOJI_RE.exec(node.textContent)) !== null) {
+      if (m.index > last) frag.appendChild(document.createTextNode(node.textContent.slice(last, m.index)));
+      frag.appendChild(makeEmojiImg(m[0], styleStr));
+      last = m.index + m[0].length;
+    }
+    if (last < node.textContent.length) frag.appendChild(document.createTextNode(node.textContent.slice(last)));
+    node.parentNode?.replaceChild(frag, node);
+  });
+}
+
 // ==================== Audio ====================
 let AC = null;
 function initAudio() {
@@ -1008,10 +1056,8 @@ function showScreen(id) {
     document.getElementById('total-stars').textContent = totalStars;
   }
 
-  // Twemoji parse
-  if (typeof twemoji !== 'undefined') {
-    twemoji.parse(el, { folder: 'svg', ext: '.svg' });
-  }
+  // OpenMoji parse
+  parseEmoji(el);
 }
 
 // ==================== Explore: Number Chart ====================
@@ -1248,10 +1294,8 @@ function showResult() {
     </div>
   `;
 
-  // Parse twemoji for result
-  if (typeof twemoji !== 'undefined') {
-    twemoji.parse(content, { folder: 'svg', ext: '.svg' });
-  }
+  // Parse OpenMoji for result
+  parseEmoji(content);
 }
 
 // ==================== Shared Helpers ====================
@@ -1471,9 +1515,7 @@ function showSkipResult() {
   `;
   document.getElementById('skipOptions').innerHTML = '';
 
-  if (typeof twemoji !== 'undefined') {
-    twemoji.parse(card, { folder: 'svg', ext: '.svg' });
-  }
+  parseEmoji(card);
 }
 
 // ==================== Position Game (Drag & Drop) ====================
@@ -1516,14 +1558,10 @@ function generatePosQuestion() {
     chartCard.innerHTML =
       '<div class="pos-label" id="posLabel">把數字卡拖到正確的位置 🎯</div>' +
       '<div class="mini-chart" id="posChart"></div>';
-    if (typeof twemoji !== 'undefined') {
-      twemoji.parse(chartCard, { folder: 'svg', ext: '.svg' });
-    }
+    parseEmoji(chartCard);
   }
   document.getElementById('posLabel').textContent = '把數字卡拖到正確的位置 🎯';
-  if (typeof twemoji !== 'undefined') {
-    twemoji.parse(document.getElementById('posLabel'), { folder: 'svg', ext: '.svg' });
-  }
+  parseEmoji(document.getElementById('posLabel'));
 
   renderPosChart(allNums);
   renderPosCards();
@@ -1724,17 +1762,13 @@ function showPosResult() {
     </div>
   `;
 
-  if (typeof twemoji !== 'undefined') {
-    twemoji.parse(chartCard, { folder: 'svg', ext: '.svg' });
-  }
+  parseEmoji(chartCard);
 }
 
 // ==================== Init ====================
 document.addEventListener('DOMContentLoaded', () => {
-  // Parse twemoji on welcome screen
-  if (typeof twemoji !== 'undefined') {
-    twemoji.parse(document.getElementById('screen-welcome'), { folder: 'svg', ext: '.svg' });
-  }
+  // 頁面載入後套用 OpenMoji
+  parseEmoji(document.getElementById('screen-welcome'));
 });
 </script>
 </body>
