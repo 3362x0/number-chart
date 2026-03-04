@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
 <title>千數探險家</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
@@ -47,6 +47,9 @@ body {
   min-height: 100dvh;
   display: flex;
   justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 #app {
@@ -1677,7 +1680,10 @@ function showPosResult() {
 
 // ==================== Init ====================
 document.addEventListener('DOMContentLoaded', () => {
-  // 初始化完成（OpenMoji 已移除）
+  // 禁用雙擊（避免誤動作：文字選取、縮放）
+  document.addEventListener('dblclick', e => e.preventDefault());
+  // 禁用長按選單（iOS Safari）
+  document.addEventListener('contextmenu', e => e.preventDefault());
 });
 </script>
 </body>
