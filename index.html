@@ -169,6 +169,8 @@ body {
   animation: cardEnter 0.35s ease forwards;
 }
 .menu-card:nth-child(2) { animation-delay: 80ms; }
+.menu-card:nth-child(3) { animation-delay: 160ms; }
+.menu-card:nth-child(4) { animation-delay: 240ms; }
 .menu-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 @keyframes cardEnter {
   from { opacity: 0; transform: translateY(12px); }
@@ -483,6 +485,172 @@ body {
   margin-top: 8px;
 }
 
+/* ==================== Skip Counting Game ==================== */
+#screen-skip {
+  gap: 16px;
+}
+.game-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.game-header .btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  padding: 4px;
+}
+.stars-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--yellow);
+  flex-shrink: 0;
+}
+.card {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+.sequence-row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 12px 4px;
+}
+.seq-cell {
+  min-width: 46px;
+  height: 52px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: clamp(12px, 3vw, 16px);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  flex-shrink: 0;
+}
+.seq-cell.blank {
+  border: 2.5px dashed var(--blue);
+  background: #EFF6FF;
+  color: var(--blue);
+  font-size: 22px;
+}
+.seq-cell.blank.current {
+  border-color: var(--yellow);
+  background: #FFFBEB;
+  animation: pulse 1s ease-in-out infinite;
+}
+.seq-cell.solved {
+  background: #ECFDF5;
+  border-color: var(--green);
+  color: var(--green);
+}
+.skip-hint {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+.skip-question {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--muted);
+  margin-top: 8px;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.option-btn {
+  font-family: 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  min-height: 72px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  border-bottom-width: 4px;
+  background: var(--white);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s, border-color 0.15s;
+  user-select: none;
+  color: var(--text);
+}
+.option-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+.option-btn.correct {
+  background: var(--neighbor-1);
+  border-color: var(--border-1);
+  animation: correctBounce 0.4s ease;
+}
+.option-btn.wrong {
+  background: #FEE2E2;
+  border-color: var(--red);
+  animation: shake 0.35s ease;
+}
+.option-btn.show-correct {
+  background: var(--neighbor-1);
+  border-color: var(--border-1);
+}
+.option-btn:disabled { cursor: default; }
+
+/* ==================== Position Game ==================== */
+#screen-position {
+  gap: 16px;
+}
+.mini-chart {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+}
+.mini-cell {
+  aspect-ratio: 1;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  font-size: clamp(9px, 2.2vw, 13px);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  color: var(--text);
+}
+.mini-cell.mini-highlight {
+  background: var(--selected);
+  border-color: var(--border-selected);
+  font-weight: 900;
+}
+.mini-cell.mini-hidden {
+  background: #EFF6FF;
+  border: 2px dashed var(--blue);
+  color: var(--blue);
+  font-weight: 900;
+}
+.pos-question-text {
+  font-size: 20px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.5;
+}
+.pos-question-text strong {
+  color: var(--blue);
+  font-size: 24px;
+}
+
 /* ==================== Responsive ==================== */
 @media (max-width: 479px) {
   .cell { font-size: clamp(11px, 3vw, 13px); }
@@ -585,6 +753,22 @@ img.emoji {
       </div>
       <svg class="icon menu-card-chevron"><use href="#icon-chevron-right"/></svg>
     </div>
+    <div class="menu-card" onclick="sfxClick(); startSkip();">
+      <div class="menu-card-icon">⏭️</div>
+      <div class="menu-card-body">
+        <div class="menu-card-title" style="color:var(--blue)">跳跳數</div>
+        <div class="menu-card-desc">按規律填入缺少的數字</div>
+      </div>
+      <svg class="icon menu-card-chevron"><use href="#icon-chevron-right"/></svg>
+    </div>
+    <div class="menu-card" onclick="sfxClick(); startPosition();">
+      <div class="menu-card-icon">🎯</div>
+      <div class="menu-card-body">
+        <div class="menu-card-title" style="color:var(--purple)">數字位置</div>
+        <div class="menu-card-desc">在千數表找到數字的位置</div>
+      </div>
+      <svg class="icon menu-card-chevron"><use href="#icon-chevron-right"/></svg>
+    </div>
     <div class="menu-stars">
       <svg class="icon"><use href="#icon-star"/></svg>
       <span id="total-stars">0</span> 顆星星
@@ -637,6 +821,60 @@ img.emoji {
       </div>
     </div>
     <div id="game-content"></div>
+  </div>
+
+  <!-- ==================== Skip Counting Game ==================== -->
+  <div id="screen-skip" class="screen">
+    <div class="game-header">
+      <button class="btn-icon" onclick="goMenu()">
+        <svg class="icon"><use href="#icon-arrow-left"/></svg>
+      </button>
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill" id="skipProgress" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="stars-badge">
+        <svg class="icon icon-star" style="color:var(--yellow)"><use href="#icon-star"/></svg>
+        <span id="skipStars">0</span>
+      </div>
+    </div>
+
+    <div class="card" id="skipCard">
+      <div class="skip-hint" id="skipHint">每次 ＋ 10</div>
+      <div class="sequence-row" id="sequenceRow"></div>
+      <div class="skip-question" id="skipQuestion"></div>
+    </div>
+
+    <div class="options-grid" id="skipOptions"></div>
+  </div>
+
+  <!-- ==================== Position Game ==================== -->
+  <div id="screen-position" class="screen">
+    <div class="game-header">
+      <button class="btn-icon" onclick="goMenu()">
+        <svg class="icon"><use href="#icon-arrow-left"/></svg>
+      </button>
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-fill" id="posProgress" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="stars-badge">
+        <svg class="icon icon-star" style="color:var(--yellow)"><use href="#icon-star"/></svg>
+        <span id="posStars">0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="mini-chart" id="miniChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="pos-question-text" id="posQuestion">題目文字</div>
+    </div>
+
+    <div class="options-grid" id="posOptions"></div>
   </div>
 
 </div>
@@ -928,6 +1166,385 @@ function showResult() {
   // Parse twemoji for result
   if (typeof twemoji !== 'undefined') {
     twemoji.parse(content, { folder: 'svg', ext: '.svg' });
+  }
+}
+
+// ==================== Shared Helpers ====================
+function goMenu() {
+  sfxClick();
+  showScreen('screen-menu');
+}
+
+// ==================== Skip Counting Game ====================
+let skipStars = 0;
+let skipRound = 0;
+const SKIP_ROUNDS = 10;
+let skipData = null;       // { step, sequence, blankIndices }
+let skipBlankIdx = 0;      // which blank we're solving (0 or 1)
+let skipRoundCorrect = 0;  // how many blanks correct in this round
+let skipActive = false;
+let skipStepMode = null;   // null = specific step, 'mixed' = mixed
+
+function generateSkipQuestion(forcedStep) {
+  const steps = [2, 5, 10, 50, 100];
+  const step = forcedStep || steps[Math.floor(Math.random() * steps.length)];
+  const maxStart = 1000 - step * 5;
+  const start = Math.floor(Math.random() * maxStart / step) * step + step;
+  const sequence = Array.from({length: 6}, (_, i) => start + i * step);
+  // 隨機選 2 個空格位置（index 1~5）
+  const blankIndices = [];
+  while (blankIndices.length < 2) {
+    const idx = 1 + Math.floor(Math.random() * 5);
+    if (!blankIndices.includes(idx)) blankIndices.push(idx);
+  }
+  blankIndices.sort((a, b) => a - b);
+  return { step, sequence, blankIndices };
+}
+
+function startSkip() {
+  skipStars = 0;
+  skipRound = 0;
+  skipActive = true;
+  // For now, use random steps (not mixed mode from menu — just random each time)
+  skipStepMode = null;
+  showScreen('screen-skip');
+  nextSkipQuestion();
+}
+
+function nextSkipQuestion() {
+  skipRound++;
+  if (skipRound > SKIP_ROUNDS) {
+    showSkipResult();
+    return;
+  }
+
+  document.getElementById('skipProgress').style.width = `${((skipRound - 1) / SKIP_ROUNDS) * 100}%`;
+  document.getElementById('skipStars').textContent = skipStars;
+
+  skipData = generateSkipQuestion(skipStepMode);
+  skipBlankIdx = 0;
+  skipRoundCorrect = 0;
+
+  // Show hint
+  const hint = document.getElementById('skipHint');
+  hint.textContent = `每次 ＋ ${skipData.step}`;
+
+  renderSequence();
+  renderSkipOptions();
+}
+
+function renderSequence() {
+  const row = document.getElementById('sequenceRow');
+  row.innerHTML = '';
+  skipData.sequence.forEach((val, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'seq-cell';
+    const blankPos = skipData.blankIndices.indexOf(i);
+    if (blankPos !== -1) {
+      if (blankPos < skipBlankIdx) {
+        // Already solved
+        cell.classList.add('solved');
+        cell.textContent = val;
+      } else if (blankPos === skipBlankIdx) {
+        // Current blank
+        cell.classList.add('blank', 'current');
+        cell.textContent = '？';
+      } else {
+        // Future blank
+        cell.classList.add('blank');
+        cell.textContent = '？';
+      }
+    } else {
+      cell.textContent = val;
+    }
+    row.appendChild(cell);
+  });
+
+  const q = document.getElementById('skipQuestion');
+  const currentBlankPosition = skipData.blankIndices[skipBlankIdx] + 1;
+  q.textContent = `第 ${currentBlankPosition} 格是多少？`;
+}
+
+function renderSkipOptions() {
+  const correctVal = skipData.sequence[skipData.blankIndices[skipBlankIdx]];
+  const step = skipData.step;
+
+  const choices = new Set([correctVal]);
+  while (choices.size < 4) {
+    // Generate wrong answers using step-related offsets
+    const mult = Math.floor(Math.random() * 3) + 1;
+    const offset = (Math.random() < 0.5 ? -1 : 1) * step * mult;
+    const wrong = correctVal + offset;
+    if (wrong >= 1 && wrong <= 1000 && wrong !== correctVal) {
+      choices.add(wrong);
+    }
+  }
+  // If still not enough (edge cases), fill with small offsets
+  while (choices.size < 4) {
+    const offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? -1 : 1);
+    const wrong = correctVal + offset;
+    if (wrong >= 1 && wrong <= 1000 && !choices.has(wrong)) {
+      choices.add(wrong);
+    }
+  }
+  const shuffled = [...choices].sort(() => Math.random() - 0.5);
+
+  const grid = document.getElementById('skipOptions');
+  grid.innerHTML = shuffled.map(c =>
+    `<button class="option-btn" data-val="${c}" onclick="checkSkipAnswer(this, ${c})">${c}</button>`
+  ).join('');
+}
+
+function checkSkipAnswer(btn, val) {
+  if (!skipActive) return;
+  const correctVal = skipData.sequence[skipData.blankIndices[skipBlankIdx]];
+  const buttons = document.querySelectorAll('#skipOptions .option-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  if (val === correctVal) {
+    btn.classList.add('correct');
+    sfxCorrect();
+    skipRoundCorrect++;
+  } else {
+    btn.classList.add('wrong');
+    sfxWrong();
+    buttons.forEach(b => {
+      if (+b.dataset.val === correctVal) b.classList.add('show-correct');
+    });
+  }
+
+  setTimeout(() => {
+    skipBlankIdx++;
+    if (skipBlankIdx < skipData.blankIndices.length) {
+      // Next blank in same question
+      renderSequence();
+      renderSkipOptions();
+    } else {
+      // Round done — award stars
+      skipStars += skipRoundCorrect;
+      nextSkipQuestion();
+    }
+  }, 1000);
+}
+
+function showSkipResult() {
+  skipActive = false;
+  totalStars += skipStars;
+  document.getElementById('skipProgress').style.width = '100%';
+  document.getElementById('skipStars').textContent = skipStars;
+
+  let msg = '';
+  const maxStars = SKIP_ROUNDS * 2;
+  if (skipStars >= maxStars) msg = '太厲害了！滿分！🎉';
+  else if (skipStars >= maxStars * 0.8) msg = '好棒！快要滿分了！';
+  else if (skipStars >= maxStars * 0.5) msg = '不錯喔！繼續加油！';
+  else msg = '再練習一下，你可以的！💪';
+
+  const card = document.getElementById('skipCard');
+  card.innerHTML = `
+    <div class="result-area">
+      <div class="result-trophy">🏆</div>
+      <div class="result-score">得到 ${skipStars} 顆星星！</div>
+      <div class="result-stars">
+        ${Array.from({length: maxStars}, (_, i) =>
+          `<svg class="icon-lg ${i < skipStars ? '' : 'empty'}"><use href="#icon-star"/></svg>`
+        ).join('')}
+      </div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-buttons">
+        <button class="btn btn-blue" onclick="startSkip();">
+          <svg class="icon"><use href="#icon-rotate-ccw"/></svg>
+          再玩一次
+        </button>
+        <button class="btn btn-muted" onclick="goMenu();">
+          <svg class="icon"><use href="#icon-home"/></svg>
+          回選單
+        </button>
+      </div>
+    </div>
+  `;
+  document.getElementById('skipOptions').innerHTML = '';
+
+  if (typeof twemoji !== 'undefined') {
+    twemoji.parse(card, { folder: 'svg', ext: '.svg' });
+  }
+}
+
+// ==================== Position Game ====================
+let posStars = 0;
+let posRound = 0;
+const POS_ROUNDS = 10;
+let posActive = false;
+let posAnswer = null;
+let posTargetN = null;
+
+function startPosition() {
+  posStars = 0;
+  posRound = 0;
+  posActive = true;
+  showScreen('screen-position');
+  nextPosQuestion();
+}
+
+function nextPosQuestion() {
+  posRound++;
+  if (posRound > POS_ROUNDS) {
+    showPosResult();
+    return;
+  }
+
+  document.getElementById('posProgress').style.width = `${((posRound - 1) / POS_ROUNDS) * 100}%`;
+  document.getElementById('posStars').textContent = posStars;
+
+  // Alternate: odd rounds = type A, even rounds = type B
+  const isTypeA = posRound % 2 === 1;
+  const n = Math.floor(Math.random() * 1000) + 1;
+  posTargetN = n;
+  const row = Math.ceil(n / 10);
+  const col = n % 10 === 0 ? 10 : n % 10;
+
+  if (isTypeA) {
+    // Type A: given number, guess position
+    renderMiniChart(n, false);
+    document.getElementById('posQuestion').innerHTML =
+      `<strong>${n}</strong> 在千數表的<br>第幾行、第幾個？`;
+
+    const correctLabel = `第 ${row} 行，第 ${col} 個`;
+    posAnswer = correctLabel;
+
+    const choices = new Set([correctLabel]);
+    while (choices.size < 4) {
+      const rOff = Math.floor(Math.random() * 5) - 2;
+      const cOff = Math.floor(Math.random() * 5) - 2;
+      const fakeR = row + rOff;
+      const fakeC = col + cOff;
+      if (fakeR >= 1 && fakeR <= 100 && fakeC >= 1 && fakeC <= 10 && !(rOff === 0 && cOff === 0)) {
+        choices.add(`第 ${fakeR} 行，第 ${fakeC} 個`);
+      }
+    }
+    const shuffled = [...choices].sort(() => Math.random() - 0.5);
+
+    const grid = document.getElementById('posOptions');
+    grid.innerHTML = shuffled.map(c =>
+      `<button class="option-btn" onclick="checkPosAnswer(this, '${c}')">${c}</button>`
+    ).join('');
+  } else {
+    // Type B: given position, guess number
+    renderMiniChart(n, false);
+    document.getElementById('posQuestion').innerHTML =
+      `第 <strong>${row}</strong> 行，第 <strong>${col}</strong> 個<br>是哪個數字？`;
+
+    posAnswer = String(n);
+
+    const choices = new Set([n]);
+    while (choices.size < 4) {
+      const rOff = Math.floor(Math.random() * 5) - 2;
+      const cOff = Math.floor(Math.random() * 5) - 2;
+      const fakeN = (row + rOff - 1) * 10 + (col + cOff);
+      if (fakeN >= 1 && fakeN <= 1000 && fakeN !== n) {
+        choices.add(fakeN);
+      }
+    }
+    const shuffled = [...choices].sort(() => Math.random() - 0.5);
+
+    const grid = document.getElementById('posOptions');
+    grid.innerHTML = shuffled.map(c =>
+      `<button class="option-btn" data-val="${c}" onclick="checkPosAnswer(this, '${c}')">${c}</button>`
+    ).join('');
+  }
+}
+
+function renderMiniChart(targetN, revealTarget) {
+  const targetRow = Math.ceil(targetN / 10);
+  const startRow = Math.max(1, targetRow - 1);
+  const endRow = Math.min(100, targetRow + 1);
+  const mini = document.getElementById('miniChart');
+  mini.innerHTML = '';
+  for (let row = startRow; row <= endRow; row++) {
+    for (let col = 1; col <= 10; col++) {
+      const n = (row - 1) * 10 + col;
+      if (n > 1000) continue;
+      const cell = document.createElement('div');
+      cell.className = 'mini-cell';
+      if (n === targetN) {
+        cell.classList.add(revealTarget ? 'mini-highlight' : 'mini-hidden');
+        cell.textContent = revealTarget ? n : '？';
+      } else {
+        cell.textContent = n;
+      }
+      mini.appendChild(cell);
+    }
+  }
+}
+
+function checkPosAnswer(btn, val) {
+  if (!posActive) return;
+  const buttons = document.querySelectorAll('#posOptions .option-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  if (val === posAnswer) {
+    btn.classList.add('correct');
+    sfxCorrect();
+    posStars++;
+    document.getElementById('posStars').textContent = posStars;
+  } else {
+    btn.classList.add('wrong');
+    sfxWrong();
+    buttons.forEach(b => {
+      // Find the correct button
+      if (b.textContent === posAnswer || b.dataset.val === posAnswer) {
+        b.classList.add('show-correct');
+      }
+    });
+  }
+
+  // Reveal target on mini chart
+  renderMiniChart(posTargetN, true);
+
+  setTimeout(() => {
+    nextPosQuestion();
+  }, 1200);
+}
+
+function showPosResult() {
+  posActive = false;
+  totalStars += posStars;
+  document.getElementById('posProgress').style.width = '100%';
+  document.getElementById('posStars').textContent = posStars;
+
+  let msg = '';
+  if (posStars === POS_ROUNDS) msg = '太厲害了！滿分！🎉';
+  else if (posStars >= POS_ROUNDS * 0.8) msg = '好棒！快要滿分了！';
+  else if (posStars >= POS_ROUNDS * 0.5) msg = '不錯喔！繼續加油！';
+  else msg = '再練習一下，你可以的！💪';
+
+  document.getElementById('miniChart').innerHTML = '';
+  document.getElementById('posQuestion').innerHTML = `
+    <div class="result-area">
+      <div class="result-trophy">🏆</div>
+      <div class="result-score">得到 ${posStars} 顆星星！</div>
+      <div class="result-stars">
+        ${Array.from({length: POS_ROUNDS}, (_, i) =>
+          `<svg class="icon-lg ${i < posStars ? '' : 'empty'}"><use href="#icon-star"/></svg>`
+        ).join('')}
+      </div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-buttons">
+        <button class="btn btn-purple" onclick="startPosition();">
+          <svg class="icon"><use href="#icon-rotate-ccw"/></svg>
+          再玩一次
+        </button>
+        <button class="btn btn-muted" onclick="goMenu();">
+          <svg class="icon"><use href="#icon-home"/></svg>
+          回選單
+        </button>
+      </div>
+    </div>
+  `;
+  document.getElementById('posOptions').innerHTML = '';
+
+  if (typeof twemoji !== 'undefined') {
+    twemoji.parse(document.getElementById('posQuestion'), { folder: 'svg', ext: '.svg' });
   }
 }
 
