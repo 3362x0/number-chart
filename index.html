@@ -1685,6 +1685,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // 禁用長按選單（iOS Safari）
   document.addEventListener('contextmenu', e => e.preventDefault());
 });
+
+// ── 禁止多點觸控（pinch-to-zoom 等）──
+// 1) iOS Safari gesture events
+document.addEventListener('gesturestart',  function(e){ e.preventDefault(); });
+document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
+document.addEventListener('gestureend',    function(e){ e.preventDefault(); });
+// 2) 標準 touchstart：多指立即阻擋
+document.addEventListener('touchstart', function(e){
+  if (e.touches.length > 1) { e.preventDefault(); }
+}, { passive: false });
+// 3) touchmove：多指一律阻擋
+let _touchStartY = 0;
+document.addEventListener('touchstart', function(e){
+  if (e.touches.length === 1) _touchStartY = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchmove', function(e){
+  if (e.touches.length > 1) { e.preventDefault(); return; }
+  // 阻擋頁面頂端往下拉（pull-to-refresh）
+  const scrollTop = document.scrollingElement ? document.scrollingElement.scrollTop : 0;
+  if (scrollTop === 0 && e.touches[0].clientY > _touchStartY) { e.preventDefault(); }
+}, { passive: false });
 </script>
 </body>
 </html>
