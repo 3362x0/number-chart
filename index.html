@@ -169,19 +169,14 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  transition: transform 0.15s, box-shadow 0.15s;
-  opacity: 0;
-  animation: cardEnter 0.35s ease forwards;
+  transition: opacity 0.35s ease, transform 0.35s ease, box-shadow 0.15s;
+  opacity: 1;
+  transform: translateY(0);
 }
-.menu-card:nth-child(3) { animation-delay: 80ms; }
-.menu-card:nth-child(4) { animation-delay: 160ms; }
-.menu-card:nth-child(5) { animation-delay: 240ms; }
 .menu-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-@keyframes cardEnter {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.menu-card-icon { font-size: 40px; flex-shrink: 0; }
+/* cardEnter removed: menu cards now use JS transitions */
+.menu-card-icon { font-size: 40px; flex-shrink: 0; position: relative; width: 52px; height: 52px; }
+.lottie-fallback { display: none; font-size: 40px; line-height: 52px; }
 .menu-card-body { flex: 1; }
 .menu-card-title { font-size: 18px; font-weight: 900; }
 .menu-card-desc { font-size: 13px; color: var(--muted); font-weight: 700; margin-top: 2px; }
@@ -788,7 +783,7 @@ body {
       <div class="menu-title">選擇關卡</div>
     </div>
     <div class="menu-card" onclick="sfxClick(); showScreen('screen-explore');">
-      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/057fc786-7ed0-4ef8-ac4c-f5b088e527a9/oBuJwfUZRS.json" autoplay loop style="width:52px;height:52px"></lottie-player></div>
+      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/057fc786-7ed0-4ef8-ac4c-f5b088e527a9/oBuJwfUZRS.json" autoplay loop style="width:52px;height:52px"></lottie-player><span class="lottie-fallback">🔍</span></div>
       <div class="menu-card-body">
         <div class="menu-card-title">探索千數表</div>
         <div class="menu-card-desc">點擊數字，看看它的鄰居在哪裡！</div>
@@ -796,7 +791,7 @@ body {
       <i class="fi fi-rr-angle-right icon menu-card-chevron"></i>
     </div>
     <div class="menu-card" onclick="sfxClick(); startNeighborGame();">
-      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/a753c220-0c29-4a1e-b243-bf46165246e5/70nC8RGlwk.json" autoplay loop style="width:52px;height:52px"></lottie-player></div>
+      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/a753c220-0c29-4a1e-b243-bf46165246e5/70nC8RGlwk.json" autoplay loop style="width:52px;height:52px"></lottie-player><span class="lottie-fallback">➕</span></div>
       <div class="menu-card-body">
         <div class="menu-card-title">加減法</div>
         <div class="menu-card-desc">練習加減法，算出加減後的數字</div>
@@ -804,7 +799,7 @@ body {
       <i class="fi fi-rr-angle-right icon menu-card-chevron"></i>
     </div>
     <div class="menu-card" onclick="sfxClick(); startSkip();">
-      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/4dd09324-aa46-47c3-97c5-72415bccc152/h2OO19PLNt.json" autoplay loop style="width:52px;height:52px"></lottie-player></div>
+      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/4dd09324-aa46-47c3-97c5-72415bccc152/h2OO19PLNt.json" autoplay loop style="width:52px;height:52px"></lottie-player><span class="lottie-fallback">🔢</span></div>
       <div class="menu-card-body">
         <div class="menu-card-title" style="color:var(--blue)">跳跳數</div>
         <div class="menu-card-desc">按規律填入缺少的數字</div>
@@ -812,7 +807,7 @@ body {
       <i class="fi fi-rr-angle-right icon menu-card-chevron"></i>
     </div>
     <div class="menu-card" onclick="sfxClick(); startPosition();">
-      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/bd1ada58-656e-4ec3-a412-e53e41609a02/euh5bzUnlK.json" autoplay loop style="width:52px;height:52px"></lottie-player></div>
+      <div class="menu-card-icon"><lottie-player src="https://assets-v2.lottiefiles.com/a/bd1ada58-656e-4ec3-a412-e53e41609a02/euh5bzUnlK.json" autoplay loop style="width:52px;height:52px"></lottie-player><span class="lottie-fallback">📍</span></div>
       <div class="menu-card-body">
         <div class="menu-card-title" style="color:var(--purple)">數字位置</div>
         <div class="menu-card-desc">把數字卡拖到千數表的正確位置</div>
@@ -975,13 +970,21 @@ function showScreen(id) {
   }
   if (id === 'screen-menu') {
     document.getElementById('total-stars').textContent = totalStars;
-    // Force reflow to restart card animations (iOS Safari rAF timing fix)
-    // Without this, cards stay at opacity:0 after returning from another screen
+    // JS-driven staggered fade-in (replaces CSS animation for iOS Safari reliability)
+    const cards = el.querySelectorAll('.menu-card');
+    cards.forEach(card => {
+      card.style.transition = 'none';
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(12px)';
+    });
     requestAnimationFrame(() => {
-      document.querySelectorAll('#screen-menu .menu-card').forEach((card, i) => {
-        card.style.animation = 'none';
-        void card.offsetWidth; // trigger reflow
-        card.style.animation = `cardEnter 0.35s ease ${i * 80}ms both`;
+      requestAnimationFrame(() => {
+        cards.forEach((card, i) => {
+          card.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+          card.style.transitionDelay = `${i * 80}ms`;
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        });
       });
     });
   }
@@ -1693,6 +1696,29 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dblclick', e => e.preventDefault());
   // 禁用長按選單（iOS Safari）
   document.addEventListener('contextmenu', e => e.preventDefault());
+
+  // Lottie fallback: detect load failure or timeout
+  document.querySelectorAll('lottie-player').forEach(lp => {
+    const fallback = lp.parentElement.querySelector('.lottie-fallback');
+    if (!fallback) return;
+    let resolved = false;
+    const showFallback = () => {
+      if (resolved) return;
+      resolved = true;
+      lp.style.display = 'none';
+      fallback.style.display = '';
+    };
+    lp.addEventListener('ready', () => { resolved = true; });
+    lp.addEventListener('error', showFallback);
+    // 4s timeout: if lottie-player hasn't rendered an SVG, show fallback
+    setTimeout(() => {
+      if (resolved) return;
+      try {
+        if (!lp.shadowRoot || !lp.shadowRoot.querySelector('svg')) showFallback();
+        else resolved = true;
+      } catch (e) { showFallback(); }
+    }, 4000);
+  });
 });
 
 // ── 禁止多點觸控（pinch-to-zoom 等）──
