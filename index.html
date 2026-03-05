@@ -975,6 +975,15 @@ function showScreen(id) {
   }
   if (id === 'screen-menu') {
     document.getElementById('total-stars').textContent = totalStars;
+    // Force reflow to restart card animations (iOS Safari rAF timing fix)
+    // Without this, cards stay at opacity:0 after returning from another screen
+    requestAnimationFrame(() => {
+      document.querySelectorAll('#screen-menu .menu-card').forEach((card, i) => {
+        card.style.animation = 'none';
+        void card.offsetWidth; // trigger reflow
+        card.style.animation = `cardEnter 0.35s ease ${i * 80}ms both`;
+      });
+    });
   }
 
 }
